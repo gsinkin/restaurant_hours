@@ -1,5 +1,5 @@
 import re
-import time
+from datetime import datetime
 from models import OpenCloseModel, OpenHours
 
 DAYS_RE = re.compile("\d+")
@@ -36,7 +36,7 @@ class OpenCloseParser(object):
     def _parse_time(self, time_str):
         for time_format in self.TIME_FORMATS:
             try:
-                return time.strptime(time_str, time_format)
+                return datetime.strptime(time_str, time_format).time()
             except ValueError:
                 pass
 

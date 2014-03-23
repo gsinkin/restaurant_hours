@@ -1,4 +1,4 @@
-import time
+from datetime import datetime
 from parsers import OpenCloseParser
 
 
@@ -8,8 +8,8 @@ def test_parse_simple():
     parser.parse("Test", "Sun 11:30 am - 9 pm")
     open_close = parser.open_close[6]
     sunday_times = open_close[0]
-    eleven_thirty = time.strptime("11:30 am", "%I:%M %p")
-    nine = time.strptime("9 pm", "%I %p")
+    eleven_thirty = datetime.strptime("11:30 am", "%I:%M %p").time()
+    nine = datetime.strptime("9 pm", "%I %p").time()
     assert sunday_times.open_time == eleven_thirty
     assert sunday_times.close_time == nine
     assert sunday_times.day_of_week == 6
@@ -19,8 +19,8 @@ def test_parse_simple():
 def test_parse_range():
     parser = OpenCloseParser()
     parser.parse("Test1", "Mon-Thu 9 am - 12:20 pm")
-    nine = time.strptime("9 am", "%I %p")
-    twelve_twenty = time.strptime("12:20 pm", "%I:%M %p")
+    nine = datetime.strptime("9 am", "%I %p").time()
+    twelve_twenty = datetime.strptime("12:20 pm", "%I:%M %p").time()
     for day in xrange(0, 4):
         open_close = parser.open_close[day]
         assert len(open_close) == 1
@@ -34,8 +34,8 @@ def test_parse_range():
 def test_parse_day_and_range():
     parser = OpenCloseParser()
     parser.parse("Test2", "Mon-Tue, Thu 9 am - 12:20 pm")
-    nine = time.strptime("9 am", "%I %p")
-    twelve_twenty = time.strptime("12:20 pm", "%I:%M %p")
+    nine = datetime.strptime("9 am", "%I %p").time()
+    twelve_twenty = datetime.strptime("12:20 pm", "%I:%M %p").time()
     days = [0, 1, 3]
     for day in days:
         open_close = parser.open_close[day]
@@ -64,9 +64,9 @@ def verify(parser, day, open_time, close_time, establishment):
 def test_parse_multiple_times():
     parser = OpenCloseParser()
     parser.parse("Test3", "Mon 9 am - 12:20 pm / Wed-Thu 12:20 pm - 5 pm")
-    nine = time.strptime("9 am", "%I %p")
-    twelve_twenty = time.strptime("12:20 pm", "%I:%M %p")
-    five = time.strptime("5 pm", "%I %p")
+    nine = datetime.strptime("9 am", "%I %p").time()
+    twelve_twenty = datetime.strptime("12:20 pm", "%I:%M %p").time()
+    five = datetime.strptime("5 pm", "%I %p").time()
     verify(parser, 0, nine, twelve_twenty, "Test3")
     days = [2, 3]
     for day in days:
@@ -77,9 +77,9 @@ def test_parse_multiple_establishments():
     parser = OpenCloseParser()
     parser.parse("Test4", "Mon 9 am - 12:20 pm")
     parser.parse("TestExtra", "Mon 9 am - 5 pm")
-    nine = time.strptime("9 am", "%I %p")
-    twelve_twenty = time.strptime("12:20 pm", "%I:%M %p")
-    five = time.strptime("5 pm", "%I %p")
+    nine = datetime.strptime("9 am", "%I %p").time()
+    twelve_twenty = datetime.strptime("12:20 pm", "%I:%M %p").time()
+    five = datetime.strptime("5 pm", "%I %p").time()
     verify(parser, 0, nine, twelve_twenty, "Test4")
     verify(parser, 0, nine, five, "TestExtra")
 
@@ -88,10 +88,10 @@ def test_parse_open_establishments():
     parser = OpenCloseParser()
     parser.parse("Test5", "Mon 9 am - 12:20 pm")
     parser.parse("TestExtra", "Mon 9 am - 5 pm")
-    nine = time.strptime("9 am", "%I %p")
-    twelve_twenty = time.strptime("12:20 pm", "%I:%M %p")
-    one = time.strptime("1 pm", "%I %p")
-    five = time.strptime("5 pm", "%I %p")
+    nine = datetime.strptime("9 am", "%I %p").time()
+    twelve_twenty = datetime.strptime("12:20 pm", "%I:%M %p").time()
+    one = datetime.strptime("1 pm", "%I %p").time()
+    five = datetime.strptime("5 pm", "%I %p").time()
     verify(parser, 0, nine, twelve_twenty, "Test5")
     verify(parser, 0, nine, five, "TestExtra")
     assert ["Test5", "TestExtra"] == parser.open_close.open_establishments(
