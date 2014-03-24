@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from models import OpenCloseModel, OpenHours
 
 DAYS_RE = re.compile("\d+")
@@ -33,10 +33,10 @@ class OpenCloseParser(object):
                 days.add(self.DAYS[day_str])
         return days
 
-    def _parse_time(self, time_str):
+    def _parse_datetime(self, time_str):
         for time_format in self.TIME_FORMATS:
             try:
-                return datetime.strptime(time_str, time_format).time()
+                return datetime.strptime(time_str, time_format)
             except ValueError:
                 pass
 
@@ -49,7 +49,7 @@ class OpenCloseParser(object):
         opening = hours[0].strip()
         closing = hours[1].strip()
         # not handling bad formatted times
-        return (self._parse_time(opening), self._parse_time(closing))
+        return (self._parse_datetime(opening), self._parse_datetime(closing))
 
     def parse(self, establishment, parse_string):
         for to_parse in parse_string.split("/"):
@@ -57,5 +57,26 @@ class OpenCloseParser(object):
             days = self._extract_days(to_parse)
             hours = self._extract_hours(to_parse)
             for day in days:
-                open_hours = OpenHours(day, hours[0], hours[1], establishment)
-                self.open_close.add(open_hours)
+                open_hours = self.get_open_hours(
+                    day, hours[0], hours[1], establishment)
+                for result in open_hours:
+                    self.open_close.add(result)
+
+    def get_open_hours(
+            self, day_of_week, open_datetime, close_datetime, establishment):
+        results = []
+        if close_datetime > open_datetime:
+            results.append(OpenHours(
+                day_of_week, open_datetime, close_datetime,
+                establishment))
+        elif close_datetime <= open_datetime:
+            midnight = datetime(
+                year=open_datetime.year, month=open_datetime.month,
+                day=open_datetime.day)
+            results.append(OpenHours(
+                day_of_week, open_datetime, midnight + timedelta(hours=24),
+                establishment))
+            results.append(OpenHours(
+                (day_of_week + 1) % 7, midnight, close_datetime,
+                establishment))
+        return results

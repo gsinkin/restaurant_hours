@@ -9,6 +9,4 @@ def find_open_restaurants(csv_filename, search_datetime):
         reader = csv.reader(infile)
         for row in reader:
             parser.parse(row[0], row[1])
-    day = search_datetime.weekday()
-    time = search_datetime.time()
-    return parser.open_close.open_establishments(day, time)
+    return parser.open_close.open_establishments(search_datetime)
