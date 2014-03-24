@@ -42,7 +42,10 @@ class OpenCloseModel(object):
         establishments = []
         # not validating input
         for open_close in self.opening_by_day[day_of_week]:
-            if (open_close.open_time <= check_time and
-                open_close.close_time > check_time):
-                establishments.append(open_close.establishment)
+            if open_close.open_time <= check_time:
+                if open_close.close_time > check_time:
+                    establishments.append(open_close.establishment)
+            else:
+                # we don't have to continue checking times
+                break
         return establishments
